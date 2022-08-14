@@ -1,0 +1,5 @@
+orderNo;matNo;description;qty;unit;dueDate;matType;orderType
+111333;LNGS0040;"Longsong Kal 5,56 IMG001";10;Buah;06/01/2022;1;Internal
+11244;BBBB;Barbeque Baby Boy Boutique  IMG002;5;Pcs;2022-06-01;2;Eksternal
+111444;LNGS0040;"Longsong Kal 5,56 IMG001";10;Buah;1 Jun 2022;1;Internal
+113555;BBBB;Barbeque Baby Boy Boutique  IMG002;5;Pcs;01 Jun 22;2;Eksternal
