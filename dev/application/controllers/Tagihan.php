@@ -7,6 +7,9 @@ class Tagihan extends MY_Controller
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('Siswa_model', 'siswa');
+		$this->load->model('Kelas_model', 'kelas');
+		$this->load->model('Payment_model', 'payment');
 		$this->load->model('Tagihan_model', 'tagih');
 		$this->load->model('Bayar_model', 'pembayaran');
 		$this->load->model('Tagihandetail_model', 'details');
@@ -66,17 +69,17 @@ class Tagihan extends MY_Controller
 
 					if (!empty($p['id_siswa'])) {
 						if(strlen($params) > 0) {
-							$params .= "AND id_siswa = {$p['id_siswa']}";
+							$params .= " AND id_siswa = {$p['id_siswa']} ";
 						} else {
-							$params = "id_siswa = {$p['id_siswa']}";
+							$params = " id_siswa = {$p['id_siswa']} ";
 						}
 					}
 
 					if (!empty($p['id_akun'])) {
 						if(strlen($params) > 0) {
-							$params .= "AND id_akun = {$p['id_akun']}";
+							$params .= " AND id_akun = {$p['id_akun']}";
 						} else {
-							$params = "id_akun = {$p['id_akun']}";
+							$params = " id_akun = {$p['id_akun']}";
 						}
 					}
 
@@ -87,7 +90,7 @@ class Tagihan extends MY_Controller
             if (!empty($params) || strlen($params) > 0) {
               $params .= " AND (tenggat_waktu BETWEEN '$awal' AND '$akir') ";
             } else {
-              $params = "tenggat_waktu BETWEEN '$awal' AND '$akir'";
+              $params = " tenggat_waktu BETWEEN '$awal' AND '$akir'";
             }
           }
 
@@ -140,7 +143,7 @@ class Tagihan extends MY_Controller
 					if ($reqData) {
 						$bayar = $this->pembayaran->sum("jumlah_bayar", ["id_detail" => $p["id"]]);
 
-						$reqData->terbayar = $bayar->jumlah_bayar;
+						$reqData->terbayar = $bayar->jumlah_bayar == null ? 0 : $bayar->jumlah_bayar ;
 
 						echo json_encode([
 							"success" => true,
@@ -273,6 +276,143 @@ class Tagihan extends MY_Controller
 
 
 				break;
+
+				case "importExcel":
+					$inputan = $p["data"];
+					$jumlah_masuk = 0;
+					$jumlah_data  = count($inputan);
+
+					foreach ($inputan as $data) {
+						foreach ($data as $key => $val) {
+							$data[$key] = trim($data[$key]);
+						}
+
+						$kelas   = str_split($data["kelas"]);
+						$tingkat = $kelas[0];
+						$label   = $kelas[1];
+
+						$cek_kelas = $this->kelas->get_by(
+							[
+								"tingkat" => $tingkat,
+								"label" 	=> $label,
+							],
+							1,
+							0,
+							true
+						);
+
+						$id_kelas = null;
+
+						if ($cek_kelas) {
+							$id_kelas = $cek_kelas->id_kelas;
+						} 
+
+						if ($id_kelas == null) {
+							echo "$kelas $tingkat";
+							continue;
+						}
+
+						$siswa = $this->siswa->get_by(["id_kelas" => $id_kelas]);
+						if (empty($siswa) || count($siswa) == 0) continue;
+
+						$id_akun = $data["kd_akun"];
+						$nm_akun = $data["nm_akun"];
+						$cekAkun = $this->payment->get_by(
+							[
+								"kode_akun" => $id_akun,
+								"nama_akun" => $nm_akun,
+							],
+							1, 0, true
+						);
+
+						if (empty($cekAkun)) {
+							$id_akun = $this->payment->insert(
+								[
+									"kode_akun" => $id_akun,
+									"nama_akun" => $nm_akun,
+								],
+								false,
+								true
+							);
+						} else {
+							$this->payment->update(
+								[
+									"kode_akun" => $id_akun,
+									"nama_akun" => $nm_akun,
+								],
+								[
+									"id_akun" => $cekAkun->id_akun,
+								]
+							);
+							$id_akun = $cekAkun->id_akun;
+						}
+
+						$formulir_tagihan = [
+							"id_akun" => $id_akun,
+							"catatan" => $data["catatan"],
+							"nominal" => $data["nominal"],
+							"tenggat_waktu" => strlen($data["tenggat_waktu"]) == 10 ? $data["tenggat_waktu"] : date("Y-m-d"),
+							"user_pembuat" => $this->session->userdata("user_id"),
+            	"user_perubah" => $this->session->userdata("user_id"),
+						];
+
+						if ($id_tagihan = $this->tagih->insert($formulir_tagihan, false, true)) {
+							$detail_tagihan = [];
+							foreach ($siswa as $murid) {
+								$tagihan_siswa = [
+									"id_tagihan" => $id_tagihan,
+									"id_siswa"	 => $murid->id_siswa,
+								];
+
+								$cek_tagihan = [
+									"id_akun" 			=> $id_akun,
+									"nominal" 			=> $data["nominal"],
+									"catatan" 			=> $data["catatan"],
+									"tenggat_waktu" => strlen($data["tenggat_waktu"]) == 10 ? $data["tenggat_waktu"] : date("Y-m-d"),
+									"user_pembuat" 	=> $this->session->userdata("user_id"),
+									"id_siswa" 			=> $murid->id_siswa
+								];
+
+								$this->details->_table_name = "v_tagihan_detail";
+								$jumlah_tagihan = $this->details->count($cek_tagihan);
+
+								if ($jumlah_tagihan < 1) $detail_tagihan[] = $tagihan_siswa;
+							}
+							
+
+							if (count($detail_tagihan) == 0) {
+								$this->tagih->delete($id_tagihan);
+							} else {
+								$this->details->_table_name = "tagihan_detail";
+
+								if ($this->details->insert($detail_tagihan, true) == "sukses") {
+									$jumlah_masuk++;
+								}
+							}
+						} 
+					}
+
+					if ($jumlah_masuk > 0) {
+						if ($jumlah_data == $jumlah_masuk) {
+							echo json_encode([
+								"success" => true,
+								"warning" => false,
+								"message" => "Semua data tagihan berhasil diupload !"
+							]);
+						} else {
+							echo json_encode([
+								"success" => true,
+								"warning" => true,
+								"message" => "Tidak Semua data tagihan berhasil diupload !"
+							]);
+						}
+					} else {
+						echo json_encode([
+							"success" => false,
+							"message" => "Tidak ada data tagihan yang berhasil diupload !"
+						]);
+					}
+        break;
 
         default:
 					echo json_encode([

@@ -226,12 +226,19 @@ $(window).hashchange(function () {
         ttoastr.error("Data Siswa Tidak Ditemukan !")
         window.history.pushState(null, null, path)
       }
+    } else if (hash.search('import') == 0) {
+      $("#modal-import").modal("show")
     }
   }
 
   $('#modal-siswa').on('hidden.bs.modal', function () {
     window.history.pushState(null, null, path)
     $("#modal-siswa-form").get(0).reset()
+  })
+
+  $('#modal-import').on('hidden.bs.modal', function () {
+    window.history.pushState(null, null, path)
+    $("#modal-import-form").get(0).reset()
   })
 
   $('#modal-delete').on('hidden.bs.modal', function () {
@@ -326,6 +333,51 @@ btnHapusSubmit.on("click", (e) => {
   })
 })
 
+$("#modal-import-submit").on("click", (e) => {
+  e.preventDefault()
+
+  const fieldID = "modal-import-file"
+
+  if (document.getElementById(fieldID).files.length == 0) {
+    $("#modal-import .modal-body").append(
+      `
+      <div class="row" id="modal-import-alert">
+        <div class="col-12">
+          <div class="alert alert-danger">
+            Belum ada file terpilih !
+          </div>
+        </div>
+      </div>
+      `
+    )
+
+    setTimeout(() => {
+      $("#modal-import-alert").remove()
+    }, 3500)
+
+  }
+
+  if (validasiFileUpload(fieldID)) {
+    return handleExcelImport(fieldID)
+  } else {
+    $("#modal-import .modal-body").append(
+      `
+      <div class="row" id="modal-import-alert">
+        <div class="col-12">
+          <div class="alert alert-danger">
+            File Tidak Valid !
+          </div>
+        </div>
+      </div>
+      `
+    )
+
+    setTimeout(() => {
+      $("#modal-import-alert").remove()
+    }, 4000)
+  }
+})
+
 function validate() {
   let msg = ""
 
@@ -361,4 +413,128 @@ function validate() {
   } else {
     return true
   }
+}
+
+function validasiExcel(fieldID) {
+  const fileUpload = document.getElementById(fieldID)
+
+  //Validate whether File is valid Excel file.
+  let regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/
+  if (regex.test(fileUpload.value.toLowerCase())) return true
+
+  return false
+}
+
+function validasiFileUpload(fieldID) {
+  if (validasiExcel(fieldID)) return true
+
+  return false
+}
+
+const handleExcelImport = (fieldID) => {
+  //Reference the FileUpload element.
+  const fileUpload = document.getElementById(fieldID)
+
+  //Validate whether File is valid Excel file.
+  let regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/
+  if (regex.test(fileUpload.value.toLowerCase())) {
+    if (typeof (FileReader) != "undefined") {
+      let reader = new FileReader()
+
+      //For Browsers other than IE.
+      if (reader.readAsBinaryString) {
+        reader.onload = function (e) {
+          const datah = e.target.result
+
+          let workbook = XLSX.read(datah, {
+            type: 'binary'
+          })
+
+          //Fetch the name of First Sheet.
+          let firstSheet = workbook.SheetNames[0]
+
+          //Read all rows from First Sheet into an JSON array.
+          let excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet])
+
+          postExcelData(excelRows)
+        }
+        reader.readAsBinaryString(fileUpload.files[0])
+      } else {
+        //For IE Browser.
+        reader.onload = function (e) {
+          let data = ""
+          let bytes = new Uint8Array(e.target.result)
+          for (let i = 0; i < bytes.byteLength; i++) {
+            data += String.fromCharCode(bytes[i])
+          }
+
+          let workbook = XLSX.read(datah, {
+            type: 'binary'
+          })
+
+          //Fetch the name of First Sheet.
+          let firstSheet = workbook.SheetNames[0]
+
+          //Read all rows from First Sheet into an JSON array.
+          let excelRows = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[firstSheet])
+
+          postExcelData(excelRows)
+        }
+        reader.readAsArrayBuffer(fileUpload.files[0])
+      }
+    } else {
+      toastr.error("Browser yang anda pakai tidak mendukung HTML5.")
+    }
+  } else {
+    toastr.error("Silahkan pilih file excel yang valid !")
+  }
+}
+
+const postExcelData = (data) => {
+  $.ajax({
+    url: `${siteUrl}/siswa/action/importExcel`,
+    data: { data },
+    type: "POST",
+    dataType: "json",
+    beforeSend: () => {
+      $("div.overlao").css("display", "flex")
+      $("header").css("display", "none")
+      $("body").css("overflow", "hidden")
+    },
+    complete: () => {
+      $("div.overlao").css("display", "none")
+      $("header").css("display", "block")
+      $("body").css("overflow", "auto")
+    },
+    success: (result) => {
+      const { success, message } = result
+      if (success) {
+        $("#modal-import").modal("hide")
+        toastr.success(message)
+
+        getSiswa()
+      } else {
+        $("#modal-import .modal-body").append(
+          `
+              <div class="row" id="modal-import-alert">
+                <div class="col-12">
+                  <div class="alert alert-danger">
+                    ${message}
+                  </div>
+                </div>
+              </div>
+              `
+        )
+
+        setTimeout(() => {
+          $("#modal-import-alert").remove()
+        }, 4000)
+      }
+
+    },
+    error: (jqXHR, textStatus, errorThrown) => {
+      if (textStatus == "parsererror") window.location.href = `${siteUrl}/${path}`
+      toastr.error(textStatus)
+    },
+  })
 }

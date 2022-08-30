@@ -130,6 +130,7 @@ $siteUrl = $SConfig->_site_url;
                 <select name="id_kelas" id="modal-pilihan-id_kelas" class="form-control select2">
                   <option value="init">Initial</option>
                 </select>
+                <input type="hidden" name="tipe" id="modal-pilihan-tipe"/>
               </div>
             </div>
             <div class="col-12">

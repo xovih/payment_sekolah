@@ -180,6 +180,89 @@ class Siswa extends MY_Controller
 
 				break;
 
+				case "importExcel":
+					$inputan = $p["data"];
+          $data_siswa = [];
+
+					foreach ($inputan as $data) {
+
+						foreach ($data as $key => $val) {
+							$data[$key] = trim($data[$key]);
+						}
+
+						$kelas   = str_split($data["kelas"]);
+						$tingkat = $kelas[0];
+						$label   = $kelas[1];
+
+						$no_induk = $data["nisn"];
+						$nama 		= $data["nama"];
+						$jenis_kelamin = $data["jk"];
+
+						$cek_kelas = $this->kelas->get_by(
+							[
+								"tingkat" => $tingkat,
+								"label" 	=> $label,
+							],
+							1,
+							0,
+							true
+						);
+
+						$id_kelas = null;
+
+						if ($cek_kelas) {
+							$id_kelas = $cek_kelas->id_kelas;
+						} else {
+							$id_kelas = $this->kelas->insert(
+								[
+									"tingkat" => $tingkat,
+									"label" 	=> $label,
+								],
+								false,
+								true
+							);
+						}
+
+						$siswa = [
+							"no_induk" => $no_induk,
+							"nama" => $nama,
+							"jenis_kelamin" => $jenis_kelamin,
+							"id_kelas" => $id_kelas,
+						];
+
+						$hitung_siswa = $this->siswa->count(
+							[
+								"no_induk" => $no_induk,
+								"nama" => $nama,
+								"jenis_kelamin" => $jenis_kelamin
+							]
+						);
+
+						if ($hitung_siswa == 0) $data_siswa[] = $siswa;
+					}
+
+					if (count($data_siswa) > 0) {
+						$req = $this->siswa->insert($data_siswa, true);
+
+						if ($req == "sukses") {
+							echo json_encode([
+								"success" => true,
+								"message" => "Sukses Mengimport Data Siswa !"
+							]);
+						} else {
+							echo json_encode([
+								"success" => false,
+								"message" => "Gagal memproses import !"
+							]);
+						}
+					} else {
+						echo json_encode([
+							"success" => false,
+							"message" => "Tidak ada data siswa yang diupload, kemungkinan semua siswa di excel sudah terdaftar."
+						]);
+					}
+        break;
+
         default:
 					echo json_encode([
 						"success" => false,

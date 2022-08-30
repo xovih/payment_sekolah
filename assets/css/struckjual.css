@@ -1,0 +1,79 @@
+* {
+	font-size: 9pt;
+	font-family: Arial, Helvetica, sans-serif;
+	-webkit-print-color-adjust: exact;
+	color-adjust: exact;
+}
+
+@page {
+	size: potrait;
+	-webkit-print-color-adjust: exact;
+	color-adjust: exact;
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	-webkit-print-color-adjust: exact;
+	color-adjust: exact;
+}
+
+table.header {
+	width: 98%;
+	margin-right: 1%;
+}
+
+img .center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+table.instansi {
+	padding: 10px;
+	text-align: left;
+}
+
+table.price {
+	margin-top: 10px;
+	width: 98%;
+	margin-right: 1%;
+	border-collapse: collapse;
+	margin-bottom: 15px;
+}
+
+table.deskripsi {
+	width: 98%;
+	margin-right: 1%;
+}
+
+tr.top th {
+	border-top: 1px solid black;
+	border-collapse: collapse;
+	text-align: left;
+}
+
+tr.bot th {
+	border-top: 1px solid black;
+	border-collapse: collapse;
+	padding-top: 5px !important;
+}
+
+.kiri {
+	text-align: left;
+	vertical-align: middle;
+}
+
+.kanan {
+	text-align: right;
+	vertical-align: middle;
+}
+
+.tengah {
+	text-align: center;
+	align-content: center;
+	vertical-align: middle;
+}
+
+.top25 {
+	margin-top: 25px;
+}

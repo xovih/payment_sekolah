@@ -71,7 +71,7 @@ $siteUrl = $SConfig->_site_url;
                   </div>
                 </div>
                 <div class="row">
-                  <div class="col-12 col-lg-9">
+                  <div class="col-12">
                     <div class="form-group">
                       <label for="">Catatan Pembayaran</label>
                       <textarea name="catatan" id="catatan" class="form-control"></textarea>
@@ -143,4 +143,5 @@ $siteUrl = $SConfig->_site_url;
 <script src="<?=$siteUrl?>assets/custom-js/pembayaran.js"></script>
 <script>
   window.history.pushState(null, null, window.location.pathname)
+  opsiSiswa()
 </script>

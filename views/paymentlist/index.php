@@ -7,11 +7,11 @@ $siteUrl = $SConfig->_site_url;
 <div class="main-content">
   <section class="section">
     <div class="section-header">
-      <h1>Manajemen Akun Pembayaran</h1>
+      <h1>Akun Pembayaran</h1>
       <div class="section-header-button">
         <a href="#add" class="btn btn-primary">
           <i class="fa fa-sitemap"></i>&nbsp;&nbsp; 
-          Tambah Akun Pembayaran
+          Tambah Akun
         </a>
       </div>
       <div class="section-header-breadcrumb">
@@ -19,9 +19,9 @@ $siteUrl = $SConfig->_site_url;
           <a href="#">Master Data</a>
         </div>
         <div class="breadcrumb-item active">
-          <a href="#">Manajemen Akun Pembayaran</a>
+          <a href="#">Akun Pembayaran</a>
         </div>
-        <div class="breadcrumb-item">List Akun Pembayaran</div>
+        <div class="breadcrumb-item">List Akun</div>
       </div>
     </div>
 
@@ -138,7 +138,8 @@ $siteUrl = $SConfig->_site_url;
 
 </div>
 
-<script src="<?=$siteUrl?>assets/js/socket.io.min.js"></script>
+<script src="<?=$siteUrl?>assets/js/jszip.min.js"></script>
+<script src="<?=$siteUrl?>assets/js/xlsx.mini.min.js"></script>
 <script src="<?=$siteUrl?>assets/plugins/twbs-pagination/twbs.min.js"></script>
 <script src="<?=$siteUrl?>assets/custom-js/paymentlist.js"></script>
 <script>

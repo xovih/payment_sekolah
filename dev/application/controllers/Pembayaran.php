@@ -8,6 +8,7 @@ class Pembayaran extends MY_Controller
 	{
 		parent::__construct();
 		$this->load->model('Bayar_model', 'bayar');
+		$this->load->model('User_model', 'petugas');
 	}
 
 	public function index()
@@ -82,9 +83,18 @@ class Pembayaran extends MY_Controller
 				break;
 
 				case "get":
+
+					$this->bayar->_table_name = "v_pembayaran";
+					$this->bayar->_order_by = "waktu_transaksi";
+
 					$reqData = $this->bayar->get($p["id"]);
 
 					if ($reqData) {
+
+						$id_petugas = $reqData->id_petugas;
+						$petugas = $this->petugas->get($id_petugas);
+						$reqData->nama_petugas = $petugas->fullname;
+
 						echo json_encode([
 							"success" => true,
 							"data" => $reqData
@@ -103,40 +113,18 @@ class Pembayaran extends MY_Controller
 					$data = array(
             'id_tagihan' => $p['id_tagihan'],
             'nominal' => $p['nominal'],
-            'id_petugas' => $this->session->userdata("id_user"),
-          );
-
-					$req = $this->bayar->insert($data);
-
-					if ($req == "sukses") {
-						echo json_encode([
-							"success" => true,
-							"message" => "Pembayaran Sukses Diproses !"
-						]);
-					} else {
-						echo json_encode([
-							"success" => false,
-							"message" => "Internal Server Error !",
-						]);
-					}
-				break;
-
-				case "update":
-					$where = [
-            "id_pembayaran" => $p["id_pembayaran"],
-          ];
-
-					$data = array(
-            'nominal' => $p['nominal'],
+            'tunai' => $p['tunai'],
+            'sisa' => $p['sisa'],
+            'catatan' => !empty($p['catatan']) ? $p['catatan'] : "",
             'id_petugas' => $this->session->userdata("user_id"),
           );
 
-					$req = $this->bayar->update($data, $where);
 
-					if ($req == "sukses") {
+					if ($req = $this->bayar->insert($data, false, true)) {
 						echo json_encode([
 							"success" => true,
-							"message" => "Data Pembayaran Sukses Diubah !"
+							"message" => "Pembayaran Sukses Diproses !",
+							"trid" => $req,
 						]);
 					} else {
 						echo json_encode([

@@ -3,6 +3,14 @@ global $SConfig;
 $siteUrl = $SConfig->_site_url;
 ?>
 
+<div class="overlao">
+  <img class="airplane" src="<?= $siteUrl ?>/assets/images/airplane.png" alt="airplane">
+  <h3>Sedang Mengunggah . .</h3>
+  <img class="cloud1" src="<?= $siteUrl ?>/assets/images/cloud.png" alt="cloud1">
+  <img class="cloud2" src="<?= $siteUrl ?>/assets/images/cloud.png" alt="cloud2">
+  <img class="cloud3" src="<?= $siteUrl ?>/assets/images/cloud.png" alt="cloud3">
+</div>
+
 <!-- Main Content -->
 <div class="main-content">
   <section class="section">
@@ -12,6 +20,10 @@ $siteUrl = $SConfig->_site_url;
         <a href="#add" class="btn btn-primary">
           <i class="fa fa-id-badge"></i>&nbsp;&nbsp; 
           Tambah Data Siswa
+        </a>
+        <a href="#import" class="btn btn-dark">
+          <i class="fa fa-file-excel"></i>&nbsp;&nbsp; 
+          Import Data
         </a>
       </div>
       <div class="section-header-breadcrumb">
@@ -153,9 +165,42 @@ $siteUrl = $SConfig->_site_url;
     </div>
   </div>
 
+  <div class="modal fade" role="dialog" id="modal-import"  style="margin-top: 5%">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-import-cop"><i class="fa fa-upload"></i> Import Siswa dari Excel</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action="" method="post" enctype="multipart/form-data" id="modal-import-form">
+            <div class="row">
+              <div class="col-12">
+                <img src="<?=$siteUrl?>/assets/images/siswa.png" class="rounded" style="width:100%" alt="Panduan">
+              </div>
+              <div class="col-12">
+                <div class="form-group">
+                  <input type="file" id="modal-import-file" name="file" class="form-control" aria-describedby="fileHelpText">
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-dark" id="modal-import-submit">Import !</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<script src="<?=$siteUrl?>assets/js/socket.io.min.js"></script>
+<script src="<?=$siteUrl?>assets/js/jszip.min.js"></script>
+<script src="<?=$siteUrl?>assets/js/xlsx.mini.min.js"></script>
 <script src="<?=$siteUrl?>assets/plugins/twbs-pagination/twbs.min.js"></script>
 <script src="<?=$siteUrl?>assets/custom-js/siswa.js"></script>
 <script>
