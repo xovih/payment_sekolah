@@ -51,7 +51,7 @@ $userData = $this->session->userdata;
       <a href="index.html">MTSN 7 Kediri</a>
     </div>
     <div class="sidebar-brand sidebar-brand-sm">
-      <a href="index.html">MG</a>
+      <a href="index.html">MK</a>
     </div>
     <ul class="sidebar-menu">
       

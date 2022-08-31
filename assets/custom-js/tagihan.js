@@ -112,7 +112,7 @@ function getTagihan(search = null, page = 1, scroll = false) {
 							<td class="text-center">${d.tenggat_waktu}</td>
 							<td class="text-center">${status}</td>
               <td class="text-center" nowrap>
-                <a href="${updatelink}" class="btn-sm btn-danger"><i class="fa fa-edit"></i> Detail</a>
+                <a href="${updatelink}" class="btn-sm btn-dark"><i class="fa fa-edit"></i> Detail</a>
               </td>
             <tr>
           `
@@ -154,8 +154,8 @@ function getTagihan(search = null, page = 1, scroll = false) {
 		},
 		error: function (jqXHR, textStatus, errorThrown) {
 			if (textStatus == "parsererror")
-				// window.location.href = `${siteUrl}${window.location.pathname}`;
-				toastr.error(textStatus)
+				window.location.href = `${siteUrl}${window.location.pathname}`
+			toastr.error(textStatus)
 		},
 	})
 }
@@ -932,7 +932,7 @@ const postExcelData = (data) => {
 
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			// if (textStatus == "parsererror") window.location.href = `${siteUrl}/${path}`
+			if (textStatus == "parsererror") window.location.href = `${siteUrl}/${path}`
 			toastr.error(textStatus)
 		},
 	})

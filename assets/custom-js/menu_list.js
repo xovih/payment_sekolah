@@ -221,7 +221,7 @@ function getMenus(menuType, search = null, page = 1, scroll = false) {
       }
     },
     error: function (jqXHR, textStatus, errorThrown) {
-      // if (textStatus == "parsererror") window.location.href = `${siteUrl}${window.location.pathname}`
+      if (textStatus == "parsererror") window.location.href = `${siteUrl}${window.location.pathname}`
       toastr.error(textStatus)
     }
   })
